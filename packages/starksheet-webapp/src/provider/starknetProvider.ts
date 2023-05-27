@@ -2,7 +2,11 @@ import { Abi, RpcProvider, SequencerProvider, number } from "starknet";
 import { RC_BOUND } from "../utils/constants";
 import { hex2str } from "../utils/hexUtils";
 import { ChainProvider } from "./chainProvider";
+import { ApplicationBinaryInterface, ContractCall } from '../types';
 
+/**
+ * A starknet implementation of the ChainProvider.
+ */
 export class StarknetProvider implements ChainProvider {
   private rpcProvider: RpcProvider;
   private sequencerProvider: SequencerProvider;
@@ -21,27 +25,42 @@ export class StarknetProvider implements ChainProvider {
     this.rpcProvider.getChainId().then((id) => (this.chainId = hex2str(id)));
   }
 
+  /**
+   * @inheritDoc
+   */
   getExplorerAddress(contractAddress: string) {
     return this.chainId === "SN_MAIN"
       ? `https://starkscan.co/contract/${contractAddress}`
       : `https://testnet.starkscan.co/contract/${contractAddress}`;
   }
 
+  /**
+   * @inheritDoc
+   */
   getNftMarketplaceAddress(contractAddress: string) {
     return this.chainId === "SN_MAIN"
       ? `https://starkscan.co/contract/${contractAddress}`
       : `https://testnet.starkscan.co/contract/${contractAddress}`;
   }
 
+  /**
+   * @inheritDoc
+   */
   waitForTransaction(hash: string): Promise<any> {
     return this.rpcProvider.waitForTransaction(hash, 50_000);
   }
 
+  /**
+   * @inheritDoc
+   */
   getTransactionReceipt(hash: string): Promise<any> {
     return this.rpcProvider.getTransactionReceipt(hash);
   }
 
-  async getAbi(address: string): Promise<any> {
+  /**
+   * @inheritDoc
+   */
+  async getAbi(address: string): Promise<ApplicationBinaryInterface> {
     let abi: Abi = [];
     if (number.toBN(address).eq(RC_BOUND)) {
       return abi;
@@ -90,11 +109,10 @@ export class StarknetProvider implements ChainProvider {
     ];
   }
 
-  async callContract(call: {
-    contractAddress: string;
-    entrypoint: string;
-    calldata?: any;
-  }): Promise<any> {
+  /**
+   * @inheritDoc
+   */
+  async callContract(call: ContractCall): Promise<any> {
     return this.rpcProvider.callContract(call, "latest");
   }
 }

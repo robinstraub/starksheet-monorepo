@@ -24,6 +24,6 @@ yarn-error.log*
 
 src/contract.json
 
-.env
+../../.env
 tmp
 devnet.pkl
